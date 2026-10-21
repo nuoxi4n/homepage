@@ -10,130 +10,34 @@
   },
   "enableSpecialDates": true,
   "specialDates": [
-    {
-      "month": 1,
-      "day": 1,
-      "description": "<span class='emoji'>🎉</span> 元旦快乐！新的一年，新的开始！",
-      "style": "background: linear-gradient(90deg, #ff0000, #ff7b00, #ffd000); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; text-shadow: 0 0 10px rgba(255, 0, 0, 0.3); animation: sparkle 2s infinite alternate;",
-      "target": "description"
-    },
-    {
-      "month": 2,
-      "day": 14,
-      "description": "<span class='emoji'>💖</span> 情人节快乐！愿你的生活充满爱与甜蜜！",
-      "style": "background: linear-gradient(90deg, #ff0076, #ff4da6, #ff80bf); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; text-shadow: 0 0 8px rgba(255, 0, 118, 0.3); animation: pulse 1.5s infinite alternate;",
-      "target": "description"
-    },
-    {
-      "month": 5,
-      "day": 1,
-      "description": "<span class='emoji'>🌹</span> 劳动节快乐！致敬每一位劳动者！",
-      "style": "background: linear-gradient(90deg, #00a86b, #00c97e, #00e892); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; text-shadow: 0 0 8px rgba(0, 168, 107, 0.3);",
-      "target": "description"
-    },
-    {
-      "month": 5,
-      "day": 4,
-      "description": "<span class='emoji'>🎓</span> 五四青年节快乐！青春无悔，奋斗不息！",
-      "style": "background: linear-gradient(90deg, #0066cc, #0088ff, #00aaff); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; text-shadow: 0 0 8px rgba(0, 102, 204, 0.3); animation: wave 3s infinite alternate;",
-      "target": "description"
-    },
-    {
-      "month": 6,
-      "day": 1,
-      "description": "<span class='emoji'>🧒</span> 儿童节快乐！愿每个孩子都能健康快乐成长！",
-      "style": "background: linear-gradient(90deg, #ff9900, #ffcc00, #ffff00); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; text-shadow: 0 0 8px rgba(255, 153, 0, 0.3); animation: bounce 1s infinite alternate;",
-      "target": "description"
-    },
-    {
-      "month": 8,
-      "day": 1,
-      "description": "<span class='emoji'>🎖️</span> 八一建军节！向中国人民解放军致敬！感谢你们保家卫国、守护和平！",
-      "style": "background: linear-gradient(90deg, #cc0000, #ff0000, #ff3333); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; text-shadow: 0 0 10px rgba(204, 0, 0, 0.3);",
-      "target": "description"
-    },
-    {
-      "month": 9,
-      "day": 10,
-      "description": "<span class='emoji'>👨‍🏫</span> 教师节快乐！感谢所有辛勤的老师们！",
-      "style": "background: linear-gradient(90deg, #663399, #9966cc, #cc99ff); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; text-shadow: 0 0 8px rgba(102, 51, 153, 0.3);",
-      "target": "description"
-    },
-    {
-      "month": 9,
-      "day": 18,
-      "description": "<span class='emoji'>🕯️</span> 铭记历史，勿忘国耻！",
-      "style": "filter: grayscale(100%); -webkit-filter: grayscale(100%);",
-      "target": "global"
-    },
-    {
-      "startDate": "10-1",
-      "endDate": "10-7",
-      "description": "<span class='emoji'>🇨🇳</span> 国庆节快乐！祝福祖国繁荣昌盛！",
-      "style": "background: linear-gradient(90deg, #de2910, #ffde00); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; text-shadow: 0 0 10px rgba(222, 41, 16, 0.3); animation: glow 2s infinite alternate;",
-      "target": "description"
-    },
-    {
-      "month": 12,
-      "day": 13,
-      "description": "<span class='emoji'>🕯️</span> 南京大屠杀死难者国家公祭日，铭记历史，珍爱和平！",
-      "style": "filter: grayscale(100%); -webkit-filter: grayscale(100%);",
-      "target": "global"
-    },
-    {
-      "month": 12,
-      "day": 25,
-      "description": "<span class='emoji'>🎄</span> 圣诞快乐！愿你拥有一个美好的假期！",
-      "style": "background: linear-gradient(90deg, #228b22, #32cd32, #228b22); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; text-shadow: 0 0 8px rgba(34, 139, 34, 0.3); animation: shimmer 3s infinite alternate;",
-      "target": "description"
-    }
+    { "m": 1,  "d": 1,  "emoji": "🎉", "text": "元旦快乐！新的一年，新的开始！",                                  "colors": ["#ff0000", "#ff7b00", "#ffd000"], "effect": "sparkle", "weight": 800 },
+    { "m": 2,  "d": 14, "emoji": "💖", "text": "情人节快乐！愿你的生活充满爱与甜蜜！",                          "colors": ["#ff0076", "#ff4da6", "#ff80bf"], "effect": "pulse" },
+    { "m": 5,  "d": 1,  "emoji": "🌹", "text": "劳动节快乐！致敬每一位劳动者！",                                "colors": ["#00a86b", "#00c97e", "#00e892"] },
+    { "m": 5,  "d": 4,  "emoji": "🎓", "text": "五四青年节快乐！青春无悔，奋斗不息！",                          "colors": ["#0066cc", "#0088ff", "#00aaff"], "effect": "wave" },
+    { "m": 6,  "d": 1,  "emoji": "🧒", "text": "儿童节快乐！愿每个孩子都能健康快乐成长！",                      "colors": ["#ff9900", "#ffcc00", "#ffff00"], "effect": "bounce" },
+    { "m": 8,  "d": 1,  "emoji": "🎖️", "text": "八一建军节！向中国人民解放军致敬！感谢你们保家卫国、守护和平！", "colors": ["#cc0000", "#ff0000", "#ff3333"], "weight": 800 },
+    { "m": 9,  "d": 10, "emoji": "👨‍🏫", "text": "教师节快乐！感谢所有辛勤的老师们！",                            "colors": ["#663399", "#9966cc", "#cc99ff"] },
+    { "m": 9,  "d": 18, "emoji": "🕯️", "text": "铭记历史，勿忘国耻！",                                          "effect": "memorial" },
+    { "from": "10-1", "to": "10-7", "emoji": "🇨🇳", "text": "国庆节快乐！祝福祖国繁荣昌盛！", "colors": ["#de2910", "#ffde00"], "effect": "glow", "weight": 800 },
+    { "m": 12, "d": 13, "emoji": "🕯️", "text": "南京大屠杀死难者国家公祭日，铭记历史，珍爱和平！",              "effect": "memorial" },
+    { "m": 12, "d": 25, "emoji": "🎄", "text": "圣诞快乐！愿你拥有一个美好的假期！",                            "colors": ["#228b22", "#32cd32", "#228b22"], "effect": "shimmer" }
   ],
   "social": [
-    {
-      "name": "GitHub",
-      "hidden": false,
-      "iconify": "ri:github-fill",
-      "url": "https://github.com/nuoxi4n",
-      "hoverBg": "bg-gray-700"
-    },
-    {
-      "name": "Blog",
-      "hidden": false,
-      "iconify": "ri:book-2-line",
-      "url": "https://nxvav.cn",
-      "hoverBg": "bg-gradient-to-r from-[#fd5949] to-[#d6249f]"
-    },
-    {
-      "name": "API服务",
-      "hidden": false,
-      "iconify": "ri:code-s-slash-fill",
-      "url": "https://api.nxvav.cn",
-      "hoverBg": "bg-gray-700"
-    },
-    {
-      "name": "QQ",
-      "hidden": true,
-      "iconify": "ri:qq-fill",
-      "url": "https://wpa.qq.com/wpa_jump_page?v=3&uin=1428309052&site=qq&menu=yes",
-      "hoverBg": "bg-[#ff8200]"
-    },
-    {
-      "name": "Bilibili",
-      "hidden": true,
-      "iconify": "ri:bilibili-fill",
-      "url": "https://space.bilibili.com/107773081",
-      "hoverBg": "bg-[#fb7299]"
-    },
+    { "name": "GitHub", "iconify": "ri:github-fill", "url": "https://github.com/nuoxi4n", "hoverBg": "bg-gray-700" },
+    { "name": "Blog", "iconify": "ri:book-2-line", "url": "https://nxvav.cn", "hoverBg": "bg-gradient-to-r from-[#fd5949] to-[#d6249f]" },
+    { "name": "API服务", "iconify": "ri:code-s-slash-fill", "url": "https://api.nxvav.cn", "hoverBg": "bg-gray-700" },
+    { "name": "QQ", "iconOnly": true, "iconify": "ri:qq-fill", "url": "https://wpa.qq.com/wpa_jump_page?v=3&uin=1428309052&site=qq&menu=yes", "hoverBg": "bg-[#ff8200]" },
+    { "name": "Bilibili", "iconOnly": true, "iconify": "ri:bilibili-fill", "url": "https://space.bilibili.com/107773081", "hoverBg": "bg-[#fb7299]" },
     {
       "name": "Email",
-      "hidden": true,
+      "iconOnly": true,
       "iconify": "ri:mail-fill",
       "url": "mailto:nuo_xian@qq.com",
       "hoverBg": "bg-[#00b0ff]"
     },
     {
       "name": "Sponsor",
-      "hidden": true,
+      "iconOnly": true,
       "iconify": "ri:money-cny-circle-fill",
       "url": "https://afdian.com/a/nuoxian",
       "hoverBg": "bg-red-400"
@@ -146,39 +50,14 @@
   "projectsName": "💻Projects",
   "projectsUrl": "https://github.com/nuoxi4n",
   "projectsList": [
-      {
-        "title": "HomePages",
-        "description": "这是我的个人主页项目，使用了HTML、CSS和JavaScript构建。",
-        "url": "https://github.com/nuoxi4n/Homepage",
-        "iconify": "flat-color-icons:home"
-      },
-      {
-        "title": "Beautiful-Report-Card",
-        "description": "使用PHP+MYSQL开发的学生电子成绩查询系统，输入学号和身份证号即可查询信息。",
-        "url": "https://github.com/NuoXianTech/Beautiful-Report-Card",
-        "iconify": "streamline-plump-color:file-report-flat"
-      },
-      {
-        "title": "API_Docs",
-        "description": "这是我的API文档项目，包含了各种API的使用说明和示例。",
-        "url": "https://github.com/nuoxi4n/API_Docs",
-        "iconify": "twemoji:open-file-folder"
-      },
-      {
-        "title": "Wishing-Tianqing",
-        "description": "这是模仿天气之子剧中许愿天晴的网站，使用了PHP和MYSQL构建。",
-        "url": "https://github.com/nuoxi4n/Wishing-Tianqing",
-        "iconify": "streamline-stickies-color:sun-clound-weather"
-      },
-      {
-        "title": "Uptime_Status",
-        "description": "利用UptimeRobot API展示自己网站服务状态的网站。",
-        "url": "https://github.com/nuoxi4n/Uptime_Status",
-        "iconify": "arcticons:uptimerobot"
-      }
+    { "title": "HomePages", "description": "这是我的个人主页项目，使用了HTML、CSS和JavaScript构建。", "url": "https://github.com/nuoxi4n/Homepage", "iconify": "flat-color-icons:home" },
+    { "title": "Beautiful-Report-Card", "description": "使用PHP+MYSQL开发的学生电子成绩查询系统，输入学号和身份证号即可查询信息。", "url": "https://github.com/NuoXianTech/Beautiful-Report-Card", "iconify": "flat-color-icons:statistics" },
+    { "title": "API_Docs", "description": "这是我的API文档项目，包含了各种API的使用说明和示例。", "url": "https://github.com/nuoxi4n/API_Docs", "iconify": "flat-color-icons:document" },
+    { "title": "Wishing-Tianqing", "description": "这是模仿天气之子剧中许愿天晴的网站，使用了PHP和MYSQL构建。", "url": "https://github.com/nuoxi4n/Wishing-Tianqing", "iconify": "flat-color-icons:landscape" },
+    { "title": "Uptime_Status", "description": "利用UptimeRobot API展示自己网站服务状态的网站。", "url": "https://github.com/nuoxi4n/Uptime_Status", "iconify": "flat-color-icons:line-chart" }
   ],
   "skillName": "⚡Skills",
-  "skillUrl": "https://skillicons.dev/icons?perline=15&i=apple,bootstrap,cloudflare,css,discord,docker,git,github,gmail,gradle,html,idea,java,js,jquery,kali,linux,md,mysql,nginx,nodejs,ps,php,powershell,pr,py,sqlite,twitter,unreal,vercel,vite,vscode,vue,windows,wordpress",
+  "skillUrl": "static/img/skills-15.svg",
   "music": {
     "enabled": true,
     "server": "tencent",

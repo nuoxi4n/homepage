@@ -215,15 +215,26 @@ document.addEventListener('DOMContentLoaded', function() {
   function handleSkillImage(config) {
     const skillImg = document.getElementById('skill');
     if (!skillImg || !config.skillUrl) return;
-    
+
     const updateSkillImage = debounce(() => {
       const screenWidth = window.innerWidth;
       let perline = 15;
-      
+
       if (screenWidth < 640) perline = 8;
       else if (screenWidth < 1024) perline = 12;
-      
-      skillImg.src = config.skillUrl.replace(/([?&])perline=\d+/, `$1perline=${perline}`);
+
+      // 本地图（static/img/skills-8|12|15.svg）按文件名选档；
+      // 仍支持 skillicons.dev 在线地址，按 perline 查询参数改写。
+      let src;
+      if (/skills-\d+\.svg/.test(config.skillUrl)) {
+        src = config.skillUrl.replace(/skills-\d+\.svg/, `skills-${perline}.svg`);
+      } else if (/[?&]perline=\d+/.test(config.skillUrl)) {
+        src = config.skillUrl.replace(/([?&])perline=\d+/, `$1perline=${perline}`);
+      } else {
+        src = config.skillUrl;
+      }
+
+      skillImg.src = src;
       watchImage(skillImg);
     });
 
@@ -257,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="text-lg">
           <span class="iconify" data-icon="${social.iconify}"></span>
         </div>
-        ${social.hidden ? '' : `<div class="text-sm ml-1 font-medium">${social.name}</div>`}
+        ${social.iconOnly ? '' : `<div class="text-sm ml-1 font-medium">${social.name}</div>`}
       </a>
     `).join('');
 
@@ -351,7 +362,8 @@ document.addEventListener('DOMContentLoaded', function() {
       lrcEnabled = false,
       listFolded = false,
       listMaxHeight = '340px',
-      storageName = 'metingjs'
+      storageName = 'metingjs',
+      api = ''
     } = musicConfig;
 
     const metingEl = document.createElement('meting-js');
@@ -359,6 +371,8 @@ document.addEventListener('DOMContentLoaded', function() {
       server,
       type,
       id,
+      // 留空则用 scripts.js 里的 meting_api，再退回 MetingJS 内置默认值
+      api: api || undefined,
       fixed: fixed.toString(),
       mini: mini.toString(),
       autoplay: autoplay.toString(),
@@ -383,6 +397,72 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===== 特殊日期处理 =====
+  // 节日预设：配置里只写「日期 + 表情 + 文案 + 主色」，成段的 CSS 由这里生成。
+  // 原来 11 条节日把同一套 background-clip / text-shadow 抄了 9 遍，
+  // 占到 config.json 的一半以上，改样式还得逐条改。
+  const EFFECT_DURATION = {
+    sparkle: '2s',
+    pulse: '1.5s',
+    wave: '3s',
+    bounce: '1s',
+    glow: '2s',
+    shimmer: '3s'
+  };
+
+  const MEMORIAL_STYLE = 'filter: grayscale(100%); -webkit-filter: grayscale(100%);';
+
+  function hexToRgb(hex) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(String(hex).trim());
+    if (!m) return [255, 255, 255];
+    return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
+  }
+
+  function gradientTextStyle(colors, weight, effect) {
+    const palette = (Array.isArray(colors) && colors.length ? colors : ['#8b5cf6', '#ec4899']).join(', ');
+    const [r, g, b] = hexToRgb(colors && colors[0]);
+    const blur = weight >= 800 ? 10 : 8;
+
+    let css =
+      `background: linear-gradient(90deg, ${palette});` +
+      ' -webkit-background-clip: text; background-clip: text; color: transparent;' +
+      ` font-weight: ${weight};` +
+      ` text-shadow: 0 0 ${blur}px rgba(${r}, ${g}, ${b}, 0.3);`;
+
+    if (effect && EFFECT_DURATION[effect]) {
+      css += ` animation: ${effect} ${EFFECT_DURATION[effect]} infinite alternate;`;
+    }
+    // glow / sparkle 的关键帧要跟着主色走，否则换个色号光晕还是红的
+    if (effect === 'glow' || effect === 'sparkle') {
+      css += ` --glow-rgb: ${r}, ${g}, ${b};`;
+    }
+    return css;
+  }
+
+  // 把一条节日配置规整成 { description, style, target }
+  function resolveSpecialDate(entry) {
+    // 仍然支持旧的自由写法：直接给 description / style，原样使用
+    if (entry.description || entry.style) {
+      return {
+        description: entry.description,
+        style: entry.style,
+        target: entry.target || 'global'
+      };
+    }
+
+    const emoji = entry.emoji ? `<span class='emoji'>${entry.emoji}</span> ` : '';
+    const description = emoji + (entry.text || '');
+
+    if (entry.effect === 'memorial') {
+      return { description, style: MEMORIAL_STYLE, target: 'global' };
+    }
+
+    return {
+      description,
+      style: gradientTextStyle(entry.colors, entry.weight || 700, entry.effect),
+      target: entry.target || 'description'
+    };
+  }
+
   function handleSpecialDates(config) {
     if (config.enableSpecialDates === false) return;
     if (!Array.isArray(config.specialDates)) return;
@@ -392,42 +472,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const month = today.getMonth() + 1;
     const date = today.getDate();
     
-    for (const specialDate of config.specialDates) {
-      if (isDateMatch(specialDate, today, year, month, date)) {
-        // 应用节日描述
-        if (specialDate.description && config.profile) {
-          config.profile.description = specialDate.description;
-        }
-        
-        // 应用节日样式
-        if (specialDate.style) {
-          const target = specialDate.target || 'global';
-          
-          if (target === 'global') {
-            applySpecialDayStyles(specialDate.style);
-          } else if (target === 'description') {
-            applyDescriptionStyle(specialDate.style);
-          }
-        }
-        break;
+    for (const entry of config.specialDates) {
+      if (!isDateMatch(entry, today, year, month, date)) continue;
+
+      const resolved = resolveSpecialDate(entry);
+
+      // 应用节日描述
+      if (resolved.description && config.profile) {
+        config.profile.description = resolved.description;
       }
+
+      // 应用节日样式
+      if (resolved.style) {
+        if (resolved.target === 'global') {
+          applySpecialDayStyles(resolved.style);
+        } else {
+          applyDescriptionStyle(resolved.style);
+        }
+      }
+      break;
     }
   }
 
-  function isDateMatch(specialDate, today, year, month, date) {
+  function isDateMatch(entry, today, year, month, date) {
+    // 兼容简写（m/d、from/to）与旧写法（month/day、startDate/endDate）
+    const singleMonth = entry.m !== undefined ? entry.m : entry.month;
+    const singleDay = entry.d !== undefined ? entry.d : entry.day;
+    const from = entry.from || entry.startDate;
+    const to = entry.to || entry.endDate;
+
     // 单日节日检查
-    if (specialDate.day && !specialDate.startDate) {
-      return specialDate.month === month && specialDate.day === date;
+    if (singleDay && !from) {
+      return singleMonth === month && singleDay === date;
     }
     
     // 日期范围检查
-    if (specialDate.startDate && specialDate.endDate) {
-      const [startMonth, startDay] = specialDate.startDate.split('-').map(Number);
-      const [endMonth, endDay] = specialDate.endDate.split('-').map(Number);
+    if (from && to) {
+      const [startMonth, startDay] = String(from).split('-').map(Number);
+      const [endMonth, endDay] = String(to).split('-').map(Number);
       
       if (isNaN(startMonth) || isNaN(startDay) || 
           isNaN(endMonth) || isNaN(endDay)) {
-        console.warn('Invalid date format in special date:', specialDate);
+        console.warn('Invalid date format in special date:', entry);
         return false;
       }
       
@@ -484,9 +570,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== 其他功能 =====
   function updateFooter(config) {
     const footer = document.querySelector('footer');
-    if (config.footer) {
-      footer.innerHTML = Object.values(config.footer).join('');
-    }
+    if (!footer || typeof config.footer !== 'string') return;
+    footer.innerHTML = config.footer;
   }
 
   function processDebugConfig(config) {

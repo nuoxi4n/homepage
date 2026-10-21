@@ -70,9 +70,11 @@ body {
   100% { background-position: 0% 50%; }
 }
 
+/* 关键帧里的光晕颜色取自节日主色（--glow-rgb 由 config-loader.js 写入），
+   换个色号光晕会跟着变；没设时回落到原来的红色。 */
 @keyframes sparkle {
   0%   { opacity: 1; }
-  50%  { opacity: 0.8; text-shadow: 0 0 15px rgba(255, 0, 0, 0.5); }
+  50%  { opacity: 0.8; text-shadow: 0 0 15px rgba(var(--glow-rgb, 255, 0, 0), 0.5); }
   100% { opacity: 1; }
 }
 
@@ -95,9 +97,9 @@ body {
 }
 
 @keyframes glow {
-  0%   { text-shadow: 0 0 10px rgba(222, 41, 16, 0.3); }
-  50%  { text-shadow: 0 0 20px rgba(222, 41, 16, 0.5); }
-  100% { text-shadow: 0 0 10px rgba(222, 41, 16, 0.3); }
+  0%   { text-shadow: 0 0 10px rgba(var(--glow-rgb, 222, 41, 16), 0.3); }
+  50%  { text-shadow: 0 0 20px rgba(var(--glow-rgb, 222, 41, 16), 0.5); }
+  100% { text-shadow: 0 0 10px rgba(var(--glow-rgb, 222, 41, 16), 0.3); }
 }
 
 @keyframes shimmer {
@@ -209,10 +211,12 @@ body {
    看起来就是几行字。断点取自实测（h1 在 538px 以下折 2 行、330px 以下折 3 行；
    描述在 405px 以下折 2 行），与真实折行位置对齐。 */
 .sk-name {
-  height: 2.75rem;          /* 44px 条；真实 h1 单行行高 72px */
+  height: 4.5rem;           /* 72px = 真实 h1 单行行高，条本身靠 mask 居中在中间 44px */
   width: min(22rem, 72%);
-  margin: 0 0 2.75rem;      /* 44 + 44 + 16 = 真实下边界 112px */
+  margin: 0 0 1rem;         /* 72 + 16 = 真实下边界 88px */
   border-radius: .625rem;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 14px, #000 14px 58px, transparent 58px);
+  mask-image: linear-gradient(to bottom, transparent 0 14px, #000 14px 58px, transparent 58px);
 }
 
 /* 2 行标题：真实总高 144px，行内条 44px 居中 → 14–58 / 86–130 */
@@ -411,9 +415,11 @@ body {
 }
 
 /* 社交按钮与贡献图之间原本是 0 间距，视觉上贴死；
-   两种状态都留出呼吸空间，图片加载失败时也不显得局促。 */
+   两种状态都留出呼吸空间，图片加载失败时也不显得局促。
+   比例取 SVG 的真实 viewBox（880x192），不是目测的 6/1：
+   写 6/1 会让骨架态比图片实际高度矮 39px，图片一到位整页就往下跳。 */
 .sk-host-snake {
-  aspect-ratio: 6 / 1;
+  aspect-ratio: 880 / 192;
   margin-top: 1.5rem;
 }
 
@@ -483,10 +489,15 @@ body.is-ready [data-reveal] {
   display: inline-block;
 }
 
+/* 节日渐变文字的 emoji 前缀不能跟着被裁成透明/染色：
+   父级的 color 是 transparent + background-clip: text，emoji 需要单独的兜底。
+   color 用主题变量而不是 initial（initial 恒为黑色，浅色主题下会糊在亮背景里）。 */
 .instructions span.emoji {
-  background-clip: initial !important;
-  -webkit-background-clip: initial !important;
-  color: initial !important;
+  background: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  color: var(--text-color) !important;
+  -webkit-text-fill-color: var(--text-color) !important;
   text-shadow: none !important;
   animation: none !important;
 }
