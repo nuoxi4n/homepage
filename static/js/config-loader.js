@@ -73,6 +73,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (skeleton) skeleton.classList.add('is-hidden');
       // 整块收起：页面上不留空洞，也不留一个永远闪着的假占位
       if (host) host.classList.add('is-img-error');
+      // 收起是静默的，出问题时不容易发现是哪张图没来，这里留一条可查的记录
+      console.warn('[Homepage] 图片加载失败，已收起该区域：', img.currentSrc || img.src);
     };
 
     // 超时 ≠ 失败。慢网下图片可能 20 秒才到，这时候不能把它判死刑：
