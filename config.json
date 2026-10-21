@@ -140,8 +140,8 @@
     }
   ],
   "githubSnake": {
-    "dark": "https://ghfast.top/raw.githubusercontent.com/nuoxi4n/nuoxi4n/main/assets/github-contribution-grid-snake-dark.svg",
-    "light": "https://ghfast.top/raw.githubusercontent.com/nuoxi4n/nuoxi4n/main/assets/github-contribution-grid-snake.svg"
+    "dark": "https://gh-proxy.com/raw.githubusercontent.com/nuoxi4n/nuoxi4n/main/assets/github-contribution-grid-snake-dark.svg",
+    "light": "https://gh-proxy.com/raw.githubusercontent.com/nuoxi4n/nuoxi4n/main/assets/github-contribution-grid-snake.svg"
   },
   "projectsName": "💻Projects",
   "projectsUrl": "https://github.com/nuoxi4n",
