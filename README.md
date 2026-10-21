@@ -57,7 +57,7 @@ python -m http.server 8099
 
 ## 🧩 自定义脚本
 
-`scripts.js` 是留给你自己的文件，最后加载，可以写任意脚本。删掉它页面照样能跑。
+`custom.js` 是留给你自己的文件，最后加载，可以写任意脚本。删掉它页面照样能跑。
 配置就绪后通过 `Homepage` 拿数据，不要依赖 `config-loader.js` 的内部函数：
 
 ```js
@@ -86,14 +86,14 @@ Homepage.onConfigLoaded(function (config) {
 Homepage/
 ├─ index.html              页面骨架 + 预加载脚本 + 骨架屏占位
 ├─ config.json             站点全部内容
-├─ scripts.js              自定义脚本（可删，不影响页面）
+├─ custom.js               自定义脚本（可删，不影响页面）
 ├─ docs/
 │  └─ config.md            配置字段说明
 └─ static/
    ├─ css/index.css        主题变量、骨架屏、节日动画
    ├─ js/config-loader.js  配置渲染、主题、节日预设、图片 settle
-   ├─ js/script.js         主题切换（三态）
-   └─ img/skills-*.svg     本地化的技术栈图（三档 perline）
+   ├─ js/script.js         主题切换（三态）、FPS、右键拦截
+   └─ img/                 favicon + 本地化的技术栈图（三档 perline）
 ```
 
 ## 📃 License

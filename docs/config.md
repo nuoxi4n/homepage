@@ -121,7 +121,7 @@
 | `api` | `string` | 见下 | 自建 Meting API 地址模板 |
 
 > **关于 `api`**：不写就用内置的自托管地址，想换服务可以写在根目录
-> `scripts.js` 里（`var meting_api = '...'`），或者只给这一个站点单独写在这里。
+> `custom.js` 里（`var meting_api = '...'`），或者只给这一个站点单独写在这里。
 > 注意模板里 `:server`、`:type`、`:id`、`:auth` 是 MetingJS 的占位符，**不要改成别的写法**。
 
 

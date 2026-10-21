@@ -342,8 +342,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Meting API 默认地址模板（自托管）。配置里写了 music.api 就用配置的；
-  // 没写的话，scripts.js 里若定义过 window.meting_api 仍然优先，最后才落到这里。
-  // 这样 scripts.js 只是「方便改」的入口，删掉它音乐也不会坏。
+  // 没写的话，custom.js 里若定义过 window.meting_api 仍然优先，最后才落到这里。
+  // 这样 custom.js 只是「方便改」的入口，删掉它音乐也不会坏。
   const DEFAULT_METING_API = 'https://api.nxvav.cn/api/music/?server=:server&type=:type&id=:id&auth=:auth&r=:r';
 
   function renderMusicPlayer(container, musicConfig) {
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
       server,
       type,
       id,
-      // 优先级：music.api > scripts.js 的 window.meting_api > 内置默认值
+      // 优先级：music.api > custom.js 的 window.meting_api > 内置默认值
       api: api || window.meting_api || DEFAULT_METING_API,
       fixed: fixed.toString(),
       mini: mini.toString(),
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.getConfigValue = getConfigValue;
 
   // ===== 给自定义脚本用的稳定接口 =====
-  // scripts.js 之类的自定义脚本不要去摸内部函数，用这个就好：
+  // custom.js 之类的自定义脚本不要去摸内部函数，用这个就好：
   //   Homepage.get('profile.name')                 按路径取值
   //   Homepage.onConfigLoaded(cfg => { ... })      配置就绪后执行（已就绪则立刻执行）
   //   Homepage.config                              原始配置对象
