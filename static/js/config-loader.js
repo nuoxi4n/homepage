@@ -75,6 +75,21 @@ document.addEventListener('DOMContentLoaded', function() {
       if (host) host.classList.add('is-img-error');
     };
 
+    // 超时 ≠ 失败。慢网下图片可能 20 秒才到，这时候不能把它判死刑：
+    // 一旦打了 is-img-error（display:none），随后即使加载成功也再没有机会露出来。
+    // 所以超时只把「还在等」的骨架收起来，图片本身仍保持监听，
+    // 真到了就正常显示；真的失败由 error 事件走 fail()。
+    const timeout = () => {
+      if (img.dataset.skDone === '1') return;
+      if (img.complete && img.naturalWidth > 0) {
+        settle();
+        return;
+      }
+      // 还没到，但别再让它无限流光：收起骨架，留出图片的位置
+      if (skeleton) skeleton.classList.add('is-hidden');
+      if (host) host.classList.add('is-img-loaded');
+    };
+
     if (img.complete && img.naturalWidth > 0) {
       // 缓存命中：不必等 load 事件
       settle();
@@ -85,8 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
     img.addEventListener('error', fail, { once: true });
 
     // 兜底：请求既不成功也不失败（弱网、代理挂起）时，
-    // 不能让它一直流光闪下去，超时后按失败处理，收起空位。
-    timer = setTimeout(fail, 15000);
+    // 不能让它一直流光闪下去，超时后先收起骨架，但保留图片本身的机会。
+    timer = setTimeout(timeout, 15000);
   }
 
   // ===== 配置加载 =====
