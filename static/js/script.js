@@ -19,12 +19,14 @@ console.log(
     } catch (e) {
       // Ignore storage errors and fall back to default
     }
-    return 'system';
+    // 默认深色：没存过偏好时不去跟随系统，避免浅色系统下一进来是亮的。
+    // 与 index.html <head> 的防闪脚本、index.css 的媒体查询保持一致。
+    return 'dark';
   }
 
   // Returns the resolved display mode ('dark' or 'light') for a given theme setting.
-  // Mirrors the CSS rule: @media (prefers-color-scheme: light) so that the snake image
-  // always matches what the CSS actually renders (including 'no-preference' → dark default).
+  // 'system' follows the CSS @media (prefers-color-scheme: light) rule so the snake
+  // image always matches what the stylesheet actually renders.
   function getEffectiveMode(theme) {
     if (theme === 'system') {
       return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';

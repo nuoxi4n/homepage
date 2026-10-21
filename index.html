@@ -8,8 +8,10 @@
   <meta name="description" itemprop="description" content="nuoxian's HomePages.">
   <meta name="keywords" content="nuoxian,诺仙仙君,个人主页,主页,home,index,homepage,page">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- 提前应用主题，避免闪白 -->
-  <script>(function(){try{var t=localStorage.getItem('theme-preference');if(t&&(t==='light'||t==='dark'))document.documentElement.setAttribute('data-theme',t);}catch(e){}}());</script>
+  <!-- 提前应用主题，避免闪白。
+       默认是深色：没存过偏好时直接写 data-theme="dark"，不让系统偏好决定首屏；
+       用户主动选了「跟随系统」(system) 时才不写属性，交给 CSS 的媒体查询去判断。 -->
+  <script>(function(){try{var t=localStorage.getItem('theme-preference');if(t==='system')return;document.documentElement.setAttribute('data-theme',(t==='light'||t==='dark')?t:'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}}());</script>
   <!-- 预取配置：解析阶段就发出请求，config-loader.js 复用同一个 Promise，避免二次下载 -->
   <script>
     window.configPromise = fetch('config.json').then(function (response) {
