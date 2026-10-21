@@ -8,6 +8,11 @@
   --bg-color: #000000;
   --text-color: #ffffff;
   --theme-transition: background-color 0.3s ease, color 0.3s ease;
+
+  /* ===== 骨架屏配色（深色为默认） ===== */
+  --sk-base: rgba(255, 255, 255, 0.07);
+  --sk-sheen: rgba(255, 255, 255, 0.16);
+
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: var(--theme-transition);
@@ -16,12 +21,16 @@
 :root[data-theme="light"] {
   --bg-color: #f9fafb;
   --text-color: #111827;
+  --sk-base: rgba(17, 24, 39, 0.07);
+  --sk-sheen: rgba(17, 24, 39, 0.15);
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
     --bg-color: #f9fafb;
     --text-color: #111827;
+    --sk-base: rgba(17, 24, 39, 0.07);
+    --sk-sheen: rgba(17, 24, 39, 0.15);
   }
 }
 
@@ -97,10 +106,6 @@ body {
   100% { opacity: 1; }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 /* ===== 通用样式 ===== */
 .instructions {
   line-height: 1.6;
@@ -157,34 +162,318 @@ body {
   background: rgba(128, 128, 128, 0.2);
 }
 
-/* ===== 加载遮罩样式 ===== */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+/* ============================================================
+   加载态骨架屏
+   结构约定：
+   - 每块骨架 <div class="sk ..." data-skeleton> 前置在真实元素之前，
+     两者在加载态/就绪态之间互斥显示，因此不会同时占位。
+   - 图片骨架放在 .sk-host 内并绝对定位，宿主用 aspect-ratio 预留高度；
+     图片本身仍在文档流里，加载完成后由真实高度接管。骨架从不参与高度计算，
+     所以永远不会出现「骨架 + 图片」高度翻倍。
+   ============================================================ */
+.sk {
+  background-color: var(--sk-base);
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    var(--sk-sheen) 40%,
+    var(--sk-sheen) 55%,
+    transparent 75%
+  );
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  background-position: 150% 0;
+  border-radius: .5rem;
+  animation: sk-shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -50% 0; }
+}
+
+@keyframes sk-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --- 各块尺寸 ---
+   原则：每个骨架的「margin-top + height」纵向占位等于对应真实元素的占位，
+   且统一只用 margin-top / margin-bottom 中的一侧表达间距，避免相邻外边距折叠
+   带来的累积误差。这样加载完成时内容原地显现，不会向下推挤。
+   下列数值按实测的真实布局校准（见注释中的 px 值为浏览器实测）。
+
+   文本块还要额外处理折行：标题和描述的实际占位完全由文案长度决定，
+   骨架必须跟着折行，否则内容出现时会向下顶掉一大段。这里不额外塞行元素，
+   而是把整块撑到真实总高，再用 mask 在行间「抠掉」一道缝——单条骨架
+   看起来就是几行字。断点取自实测（h1 在 538px 以下折 2 行、330px 以下折 3 行；
+   描述在 405px 以下折 2 行），与真实折行位置对齐。 */
+.sk-name {
+  height: 2.75rem;          /* 44px 条；真实 h1 单行行高 72px */
+  width: min(22rem, 72%);
+  margin: 0 0 2.75rem;      /* 44 + 44 + 16 = 真实下边界 112px */
+  border-radius: .625rem;
+}
+
+/* 2 行标题：真实总高 144px，行内条 44px 居中 → 14–58 / 86–130 */
+@media (max-width: 537px) {
+  .sk-name {
+    height: 9rem;
+    width: 78%;
+    margin-bottom: 1rem;    /* 24 + 144 + 16 = 184px，与真实一致 */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0 14px, #000 14px 58px,
+      transparent 58px 86px, #000 86px 130px,
+      transparent 130px
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0 14px, #000 14px 58px,
+      transparent 58px 86px, #000 86px 130px,
+      transparent 130px
+    );
+  }
+}
+
+/* 3 行标题（≤329px）：总高 216px → 14–58 / 86–130 / 158–202 */
+@media (max-width: 329px) {
+  .sk-name {
+    height: 13.5rem;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0 14px, #000 14px 58px,
+      transparent 58px 86px, #000 86px 130px,
+      transparent 130px 158px, #000 158px 202px,
+      transparent 202px
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0 14px, #000 14px 58px,
+      transparent 58px 86px, #000 86px 130px,
+      transparent 130px 158px, #000 158px 202px,
+      transparent 202px
+    );
+  }
+}
+
+.sk-desc {
+  height: 1.625rem;         /* 真实 <p> 单行 26px */
+  width: min(34rem, 64%);
+  margin: 0;
+}
+
+/* 2 行描述（≤404px）：总高 51px，条 16px → 5–21 / 31–47 */
+@media (max-width: 404px) {
+  .sk-desc {
+    height: 3.1875rem;
+    width: 88%;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0 5px, #000 5px 21px,
+      transparent 21px 31px, #000 31px 47px,
+      transparent 47px
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0 5px, #000 5px 21px,
+      transparent 21px 31px, #000 31px 47px,
+      transparent 47px
+    );
+  }
+}
+
+.sk-social {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 100;
-  color: white;
+  flex-wrap: wrap;
+  margin: 1rem 0 0;
 }
 
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 20px;
+/* 骨架药丸对齐真实按钮的宽高与间距（真实按钮带 mt-2 mr-2 = 8px），
+   因此窄屏下的换行行数与真实布局一致，不会出现高度跳变。 */
+.sk-pill {
+  height: 2.25rem;                 /* 真实按钮 36px */
+  margin: .5rem .5rem 0 0;
+  border-radius: .375rem;
 }
 
-.loading-text {
-  font-size: 18px;
+.sk-pill--icon {
+  width: 2.125rem;
+}
+
+@media (max-width: 639px) {
+  .sk-pill {
+    height: 2.125rem;         /* 窄屏纯图标按钮 34px */
+  }
+}
+
+.sk-row-h3 {
+  display: flex;
+  align-items: center;
+  height: 2rem;          /* 真实 <h3> 高 32px */
+  margin: 2rem 0 0;      /* mt-8 */
+}
+
+.sk-title {
+  height: 1.6rem;
+  width: 8rem;
+  border-radius: .375rem;
+}
+
+.sk-title--sm {
+  width: 6.5rem;
+}
+
+.sk-row-h3 .sk-icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  margin-left: auto;
+  border-radius: .25rem;
+}
+
+/* 标题与下方内容的 mb-4。
+   注意：HTML 里骨架行与下一块骨架之间还夹着真实元素（加载态 display:none），
+   所以间距由每块自身的 margin-top 表达，而不是相邻选择器 + 兄弟组合。 */
+.sk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .sk-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sk-card {
+  height: 5.625rem;      /* 真实卡片约 90px */
+  border-radius: .375rem;
+}
+
+.sk-footer {
+  height: 2.5rem;        /* 真实 footer 高 40px */
+  margin: 3rem 0 0;      /* mt-12 */
+}
+
+.sk-line {
+  height: .8rem;
+  width: min(26rem, 58%);
+  border-radius: .25rem;
+}
+
+.sk-line--wide {
+  width: min(34rem, 74%);
+  margin-top: .75rem;
+}
+
+/* --- 图片宿主 ---
+   骨架绝对定位、永不参与高度计算；宿主用 aspect-ratio 预留高度，
+   所以「骨架 + 图片」不可能叠加出双倍高度。
+   图片加载完成后由 JS 给宿主加 .is-img-loaded，把高度交还给真实图片，
+   否则预留比例会残留成一块空白。 */
+.sk-host {
+  position: relative;
+}
+
+.sk-host.is-img-loaded,
+.sk-host.is-img-error {
+  aspect-ratio: auto;
+}
+
+/* 加载失败时不留空框：直接收起整块，避免页面上出现一个空洞 */
+.sk-host.is-img-error {
+  display: none;
+}
+
+.sk-host > .sk {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  border-radius: .5rem;
+}
+
+.sk-host > img {
+  display: block;
+  width: 100%;
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+
+.sk-host > img.is-loaded {
+  opacity: 1;
+}
+
+.sk-host > img.is-error {
+  opacity: 0;
+}
+
+/* 社交按钮与贡献图之间原本是 0 间距，视觉上贴死；
+   两种状态都留出呼吸空间，图片加载失败时也不显得局促。 */
+.sk-host-snake {
+  aspect-ratio: 6 / 1;
+  margin-top: 1.5rem;
+}
+
+/* 技能图的宽高比取决于 icon 行数：config 里的 perline 会按屏宽改成
+   15 / 12 / 8（见 config-loader.js 的 handleSkillImage），36 个图标分别是
+   3 / 3 / 5 行，实测自然尺寸 836x161、667x161、442x273。
+   断点必须和 JS 一致（<640、<1024），否则骨架预留的高度会明显偏离。 */
+.sk-host-skill {
+  aspect-ratio: 5.2 / 1;
+  margin-top: 1rem;      /* 对应技能标题的 mb-4 */
+}
+
+@media (max-width: 1023px) {
+  .sk-host-skill {
+    aspect-ratio: 4.15 / 1;
+  }
+}
+
+@media (max-width: 639px) {
+  .sk-host-skill {
+    aspect-ratio: 1.62 / 1;
+  }
+}
+
+/* --- 加载态 / 就绪态切换 --- */
+body.is-loading [data-reveal]:not(.sk-host) {
+  display: none;
+}
+
+/* 只收起「文字/列表」骨架。图片骨架必须撑到图片真正 settle 为止，
+   否则配置一到位就整块消失，加载慢或失败时会留下一个空洞。
+   图片骨架的退场完全交给 config-loader.js 的 watchImage。 */
+body.is-ready [data-skeleton]:not([data-skeleton-img]) {
+  display: none;
+}
+
+body.is-ready [data-reveal] {
+  animation: sk-fade-in .45s ease both;
+}
+
+/* 图片骨架退场由 JS 逐张控制（见 config-loader.js 的 watchImage） */
+.sk-host > .sk.is-hidden {
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+/* 尊重减少动画偏好：只保留静态占位，不做流光 */
+@media (prefers-reduced-motion: reduce) {
+  .sk {
+    animation: none;
+    background-image: none;
+  }
+
+  body.is-ready [data-reveal] {
+    animation: none;
+  }
+
+  .sk-host > img {
+    transition: none;
+  }
 }
 
 /* ===== Emoji 样式保护 ===== */

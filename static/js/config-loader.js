@@ -31,19 +31,75 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   };
 
+  // ===== 骨架屏控制 =====
+  // index.html 的 <head> 已在解析阶段发起 config.json 请求，
+  // 这里复用那个 Promise，避免同一份配置被下载两次。
+  const configRequest = window.configPromise || fetch('config.json').then(response => {
+    if (!response.ok) throw new Error(`${response.status}`);
+    return response.json();
+  });
+
+  function revealPage() {
+    document.body.classList.remove('is-loading');
+    document.body.classList.add('is-ready');
+    document.body.removeAttribute('aria-busy');
+  }
+
+  // 图片骨架逐张退场：加载完成后收起自己的骨架，
+  // 加载失败也收起，避免破图图标后面永远闪着一个假占位。
+  function watchImage(img) {
+    if (!img || img.dataset.skWatch === '1') return;
+    img.dataset.skWatch = '1';
+
+    const host = img.closest('.sk-host');
+    const skeleton = host ? host.querySelector('[data-skeleton-img]') : null;
+    let timer = null;
+
+    const settle = () => {
+      if (img.dataset.skDone === '1') return;
+      img.dataset.skDone = '1';
+      clearTimeout(timer);
+      img.classList.add('is-loaded');
+      if (skeleton) skeleton.classList.add('is-hidden');
+      // 交还高度给真实图片：否则 aspect-ratio 预留的比例会残留成空白
+      if (host) host.classList.add('is-img-loaded');
+    };
+
+    const fail = () => {
+      if (img.dataset.skDone === '1') return;
+      img.dataset.skDone = '1';
+      clearTimeout(timer);
+      img.classList.add('is-error');
+      if (skeleton) skeleton.classList.add('is-hidden');
+      // 整块收起：页面上不留空洞，也不留一个永远闪着的假占位
+      if (host) host.classList.add('is-img-error');
+    };
+
+    if (img.complete && img.naturalWidth > 0) {
+      // 缓存命中：不必等 load 事件
+      settle();
+      return;
+    }
+
+    img.addEventListener('load', settle, { once: true });
+    img.addEventListener('error', fail, { once: true });
+
+    // 兜底：请求既不成功也不失败（弱网、代理挂起）时，
+    // 不能让它一直流光闪下去，超时后按失败处理，收起空位。
+    timer = setTimeout(fail, 15000);
+  }
+
   // ===== 配置加载 =====
-  fetch('config.json')
-    .then(response => {
-      if (!response.ok) throw new Error(`${response.status}`);
-      return response.json();
-    })
+  configRequest
     .then(config => {
       window.currentConfig = config;
       applyConfig(config);
+      revealPage();
       window.dispatchEvent(new CustomEvent('configLoaded'));
     })
     .catch(error => {
       console.error('Config Error: ', error);
+      revealPage();
       document.body.innerHTML = `
         <div class="flex items-center justify-center">
           Failed to load configuration: ${error.message}
@@ -110,6 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
       config, 
       CONFIG_SELECTORS.src, 
       (el, value) => {
+        // 技能图由 handleSkillImage 负责（要按屏宽改写 perline），
+        // 这里跳过，否则会用原始地址覆盖掉适配后的地址。
+        if (el.id === 'skill') return;
+
         const isArray = Array.isArray(value);
         const hasDarkOrLightKeys =
           value &&
@@ -132,6 +192,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           el.src = value || '';
         }
+
+        watchImage(el);
       }, 
       'configSrc'
     );
@@ -162,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
       else if (screenWidth < 1024) perline = 12;
       
       skillImg.src = config.skillUrl.replace(/([?&])perline=\d+/, `$1perline=${perline}`);
+      watchImage(skillImg);
     });
 
     updateSkillImage();

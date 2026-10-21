@@ -10,6 +10,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <!-- 提前应用主题，避免闪白 -->
   <script>(function(){try{var t=localStorage.getItem('theme-preference');if(t&&(t==='light'||t==='dark'))document.documentElement.setAttribute('data-theme',t);}catch(e){}}());</script>
+  <!-- 预取配置：解析阶段就发出请求，config-loader.js 复用同一个 Promise，避免二次下载 -->
+  <script>
+    window.configPromise = fetch('config.json').then(function (response) {
+      if (!response.ok) throw new Error(String(response.status));
+      return response.json();
+    });
+    // 先挂一个空 catch，防止在 config-loader 接手之前冒出未处理的 rejection
+    window.configPromise.catch(function () {});
+  </script>
   <!-- DNS Prefetch & Preconnect -->
   <link rel="preconnect" href="https://cdnjs.loli.net">
   <link rel="preconnect" href="https://fonts.loli.net">
@@ -27,18 +36,39 @@
   <script src="https://cdnjs.loli.net/ajax/libs/tailwindcss-browser/4.1.12/index.global.min.js"></script>
 </head>
 
-<body>
+<body class="is-loading" aria-busy="true">
   <!-- 名称 -->
-  <h1 class="name" data-config-html="profile.name"></h1>
+  <div class="sk sk-name" data-skeleton aria-hidden="true"></div>
+  <h1 class="name" data-config-html="profile.name" data-reveal></h1>
   <!-- 描述 -->
-  <p class="instructions" data-config-html="profile.description"></p>
+  <div class="sk sk-desc" data-skeleton aria-hidden="true"></div>
+  <p class="instructions" data-config-html="profile.description" data-reveal></p>
   <!-- 社交按钮  -->
-  <div class="text-current" data-config-array="social"></div>
+  <!-- 骨架宽度对齐真实按钮（3 个带文字 + 4 个纯图标 + 主题开关，
+       数值取自默认配置的实测宽度），使窄屏换行行数与真实布局一致 -->
+  <div class="sk-social" data-skeleton aria-hidden="true">
+    <div class="sk sk-pill" style="width:5.875rem"></div>
+    <div class="sk sk-pill" style="width:4.75rem"></div>
+    <div class="sk sk-pill" style="width:6.0625rem"></div>
+    <div class="sk sk-pill sk-pill--icon"></div>
+    <div class="sk sk-pill sk-pill--icon"></div>
+    <div class="sk sk-pill sk-pill--icon"></div>
+    <div class="sk sk-pill sk-pill--icon"></div>
+    <div class="sk sk-pill" style="width:7.875rem"></div>
+  </div>
+  <div class="text-current" data-config-array="social" data-reveal></div>
   <!-- Github贡献图  -->
-  <img id="github-snake" data-config-src="githubSnake" alt="Github活动贡献图" loading="lazy">
+  <div class="sk-host sk-host-snake" data-reveal>
+    <img id="github-snake" data-config-src="githubSnake" alt="Github活动贡献图" loading="lazy">
+    <div class="sk sk-snake" data-skeleton-img aria-hidden="true"></div>
+  </div>
 
   <!-- 项目标题 -->
-  <h3 class="flex items-center mt-8 mb-4 font-semibold text-2xl">
+  <div class="sk-row-h3" data-skeleton aria-hidden="true">
+    <div class="sk sk-title"></div>
+    <div class="sk sk-icon"></div>
+  </div>
+  <h3 class="flex items-center mt-8 mb-4 font-semibold text-2xl" data-reveal>
     <span class="flex-1" data-config-html="projectsName">💻Projects</span>
     <!-- 项目总跳转链接 -->
     <a href="#" data-config-href="projectsUrl" target="_blank" class="opacity-50 hover:opacity-100 ml-2 transition-opacity cursor-pointer">
@@ -46,20 +76,49 @@
     </a>
   </h3>
   <!-- 项目列表 -->
-  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2" data-config-array="projectsList"></div>
+  <div class="sk-grid" data-skeleton aria-hidden="true">
+    <div class="sk sk-card"></div>
+    <div class="sk sk-card"></div>
+    <div class="sk sk-card"></div>
+    <div class="sk sk-card"></div>
+    <div class="sk sk-card"></div>
+  </div>
+  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2" data-config-array="projectsList" data-reveal></div>
 
   <!-- 技能标题 -->
-  <h3 class="flex items-center mt-8 mb-4 font-semibold text-2xl">
+  <div class="sk-row-h3 sk-row-h3--skill" data-skeleton aria-hidden="true">
+    <div class="sk sk-title sk-title--sm"></div>
+  </div>
+  <h3 class="flex items-center mt-8 mb-4 font-semibold text-2xl" data-reveal>
     <span class="flex-1" data-config-html="skillName">⚡Skills</span>
   </h3>
   <!-- 技能列表 -->
-  <img id="skill" data-config-src="skillUrl" alt="技能图" loading="lazy">
+  <div class="sk-host sk-host-skill" data-reveal>
+    <img id="skill" data-config-src="skillUrl" alt="技能图" loading="lazy">
+    <div class="sk sk-skill" data-skeleton-img aria-hidden="true"></div>
+  </div>
 
   <!-- 底部Footer -->
-  <footer class="mt-12 mb-12 text-sm opacity-40"></footer>
+  <div class="sk-footer" data-skeleton aria-hidden="true">
+    <div class="sk sk-line"></div>
+    <div class="sk sk-line sk-line--wide"></div>
+  </div>
+  <footer class="mt-12 mb-12 text-sm opacity-40" data-reveal></footer>
 
   <!-- 音乐播放器 -->
   <div data-config-music="music"></div>
+
+  <!-- 无 JS 时的兜底：直接显示真实内容，收起骨架。
+       display 用 revert 而不是 block，避免把 Tailwind 的 flex/grid 布局压平；
+       aspect-ratio 也要一起清掉，否则图片会被预留比例裁切。 -->
+  <noscript>
+    <style>
+      .sk { display: none !important; }
+      .sk-host { aspect-ratio: auto !important; }
+      .sk-host > img { opacity: 1 !important; }
+      body.is-loading [data-reveal]:not(.sk-host) { display: revert !important; }
+    </style>
+  </noscript>
 
   <!-- APlayerJS -->
   <script src="https://cdnjs.loli.net/ajax/libs/aplayer/1.10.1/APlayer.min.js" defer></script>
