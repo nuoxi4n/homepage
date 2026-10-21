@@ -120,9 +120,9 @@
 | `storageName` | `string` | `'metingjs'` | localStorage 键名 |
 | `api` | `string` | 见下 | 自建 Meting API 地址模板 |
 
-> **关于 `api`**：默认由根目录 `scripts.js` 里的 `meting_api` 提供（自托管地址）。
+> **关于 `api`**：不写就用内置的自托管地址，想换服务可以写在根目录
+> `scripts.js` 里（`var meting_api = '...'`），或者只给这一个站点单独写在这里。
 > 注意模板里 `:server`、`:type`、`:id`、`:auth` 是 MetingJS 的占位符，**不要改成别的写法**。
-> 想换服务就在 `scripts.js` 改那一行；只想让某一个站点走别的服务，再在这里单独写。
 
 
 ## 📅 特殊日期 (specialDates)
@@ -153,8 +153,4 @@
 | `effect` | 否 | `sparkle` / `pulse` / `wave` / `bounce` / `glow` / `shimmer` / `memorial` |
 | `weight` | 否 | 字重，默认 `700`；`800` 时光晕自动加粗一档（8px → 10px） |
 | `target` | 否 | 默认 `description`（只改简介）；`global` 时整页生效。`memorial` 固定为 `global` |
-
-> **兼容旧写法**：条目里若直接写了 `description` 和 `style`（成段 CSS），会原样使用，
-> 不再走预设。旧的 `month` / `day` / `startDate` / `endDate` 也仍然认。
-> `style` 里只要含 `:` 就按 CSS 处理，否则按 Tailwind 类名加到 `<html>` 上。
 

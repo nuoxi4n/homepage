@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
       window.currentConfig = config;
       applyConfig(config);
       revealPage();
+      if (window.Homepage) window.Homepage.config = config;
       window.dispatchEvent(new CustomEvent('configLoaded'));
     })
     .catch(error => {
@@ -340,6 +341,11 @@ document.addEventListener('DOMContentLoaded', function() {
     `).join('');
   }
 
+  // Meting API 默认地址模板（自托管）。配置里写了 music.api 就用配置的；
+  // 没写的话，scripts.js 里若定义过 window.meting_api 仍然优先，最后才落到这里。
+  // 这样 scripts.js 只是「方便改」的入口，删掉它音乐也不会坏。
+  const DEFAULT_METING_API = 'https://api.nxvav.cn/api/music/?server=:server&type=:type&id=:id&auth=:auth&r=:r';
+
   function renderMusicPlayer(container, musicConfig) {
     if (!musicConfig || !musicConfig.enabled) {
       container.innerHTML = '';
@@ -371,8 +377,8 @@ document.addEventListener('DOMContentLoaded', function() {
       server,
       type,
       id,
-      // 留空则用 scripts.js 里的 meting_api，再退回 MetingJS 内置默认值
-      api: api || undefined,
+      // 优先级：music.api > scripts.js 的 window.meting_api > 内置默认值
+      api: api || window.meting_api || DEFAULT_METING_API,
       fixed: fixed.toString(),
       mini: mini.toString(),
       autoplay: autoplay.toString(),
@@ -440,15 +446,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 把一条节日配置规整成 { description, style, target }
   function resolveSpecialDate(entry) {
-    // 仍然支持旧的自由写法：直接给 description / style，原样使用
-    if (entry.description || entry.style) {
-      return {
-        description: entry.description,
-        style: entry.style,
-        target: entry.target || 'global'
-      };
-    }
-
     const emoji = entry.emoji ? `<span class='emoji'>${entry.emoji}</span> ` : '';
     const description = emoji + (entry.text || '');
 
@@ -495,34 +492,27 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function isDateMatch(entry, today, year, month, date) {
-    // 兼容简写（m/d、from/to）与旧写法（month/day、startDate/endDate）
-    const singleMonth = entry.m !== undefined ? entry.m : entry.month;
-    const singleDay = entry.d !== undefined ? entry.d : entry.day;
-    const from = entry.from || entry.startDate;
-    const to = entry.to || entry.endDate;
-
-    // 单日节日检查
-    if (singleDay && !from) {
-      return singleMonth === month && singleDay === date;
+    // 单日节日：m / d
+    if (entry.d !== undefined && entry.from === undefined) {
+      return entry.m === month && entry.d === date;
     }
-    
-    // 日期范围检查
-    if (from && to) {
-      const [startMonth, startDay] = String(from).split('-').map(Number);
-      const [endMonth, endDay] = String(to).split('-').map(Number);
-      
-      if (isNaN(startMonth) || isNaN(startDay) || 
-          isNaN(endMonth) || isNaN(endDay)) {
-        console.warn('Invalid date format in special date:', entry);
+
+    // 日期范围：from / to，两端都包含
+    if (entry.from && entry.to) {
+      const [startMonth, startDay] = String(entry.from).split('-').map(Number);
+      const [endMonth, endDay] = String(entry.to).split('-').map(Number);
+
+      if ([startMonth, startDay, endMonth, endDay].some(Number.isNaN)) {
+        console.warn('specialDates 日期格式有误，应为 "月-日"：', entry);
         return false;
       }
-      
+
       const startDate = new Date(year, startMonth - 1, startDay);
       const endDate = new Date(year, endMonth - 1, endDay + 1);
-      
+
       return today >= startDate && today < endDate;
     }
-    
+
     return false;
   }
 
@@ -580,4 +570,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 暴露配置值获取方法
   window.getConfigValue = getConfigValue;
+
+  // ===== 给自定义脚本用的稳定接口 =====
+  // scripts.js 之类的自定义脚本不要去摸内部函数，用这个就好：
+  //   Homepage.get('profile.name')                 按路径取值
+  //   Homepage.onConfigLoaded(cfg => { ... })      配置就绪后执行（已就绪则立刻执行）
+  //   Homepage.config                              原始配置对象
+  window.Homepage = {
+    config: null,
+    // 单参数版本：内部 getConfigValue 是 (obj, path)，别直接把两参函数暴露出去
+    get(path) {
+      return getConfigValue(window.Homepage.config, path);
+    },
+    onConfigLoaded(callback) {
+      if (typeof callback !== 'function') return;
+      if (window.Homepage.config) {
+        callback(window.Homepage.config);
+        return;
+      }
+      window.addEventListener('configLoaded', function handler() {
+        window.removeEventListener('configLoaded', handler);
+        callback(window.Homepage.config);
+      });
+    }
+  };
 });

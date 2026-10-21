@@ -55,6 +55,24 @@ python -m http.server 8099
 - 选择Pages导入存储库并链接Github账号
 - 选择Fork的项目，命名HomePages创建和部署即可
 
+## 🧩 自定义脚本
+
+`scripts.js` 是留给你自己的文件，最后加载，可以写任意脚本。删掉它页面照样能跑。
+配置就绪后通过 `Homepage` 拿数据，不要依赖 `config-loader.js` 的内部函数：
+
+```js
+// 按路径取配置值
+Homepage.get('profile.name');
+
+// 配置就绪后执行（已经就绪会立刻执行，不用担心时序）
+Homepage.onConfigLoaded(function (config) {
+  console.log(Homepage.config, config);
+});
+```
+
+也可以直接监听事件：`window.addEventListener('configLoaded', fn)`。
+换音乐 API 就写 `var meting_api = '...'`，不写则用内置默认地址。
+
 ## 🧠 技术栈
 
 - HTML
@@ -68,7 +86,7 @@ python -m http.server 8099
 Homepage/
 ├─ index.html              页面骨架 + 预加载脚本 + 骨架屏占位
 ├─ config.json             站点全部内容
-├─ scripts.js              Meting API 地址模板（可换自托管）
+├─ scripts.js              自定义脚本（可删，不影响页面）
 ├─ docs/
 │  └─ config.md            配置字段说明
 └─ static/
