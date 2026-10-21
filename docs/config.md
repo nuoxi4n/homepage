@@ -124,6 +124,11 @@
 > `custom.js` 里（`var meting_api = '...'`），或者只给这一个站点单独写在这里。
 > 注意模板里 `:server`、`:type`、`:id`、`:auth` 是 MetingJS 的占位符，**不要改成别的写法**。
 
+> **接口不可用时**：MetingJS 拿列表时不看状态码，接口返回 404 页面会让它把整段 HTML
+> 当 JSON 解析，控制台就多出一条 `Unexpected token '<'`。程序里已经给音乐接口单独包了一层：
+> 非 JSON 响应会被换成空列表，播放器安静地收起，不报错也不影响页面其它内容。
+> 接口恢复后照常工作，不需要改配置。
+
 
 ## 📅 特殊日期 (specialDates)
 - **enableSpecialDates**  

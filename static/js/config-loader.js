@@ -346,6 +346,45 @@ document.addEventListener('DOMContentLoaded', function() {
   // 这样 custom.js 只是「方便改」的入口，删掉它音乐也不会坏。
   const DEFAULT_METING_API = 'https://api.nxvav.cn/api/music/?server=:server&type=:type&id=:id&auth=:auth&r=:r';
 
+  // MetingJS 2.0.2 拉列表那一行是 `fetch(url).then(res => res.json())`，不看状态码。
+  // 音乐 API 挂掉或返回 404 页面时，它会把整段 HTML 丢进 JSON.parse，
+  // 抛出一个没人 catch 的 SyntaxError 冒到控制台（每个访客都看得到一条红色报错）。
+  // 这里只包一层「音乐 API」的请求：非 JSON 响应换成空数组，播放器安静地显示空列表，
+  // 其它请求一律原样放行，不影响页面其它部分。
+  function guardMetingFetch(apiTemplate) {
+    if (window.__metingFetchGuarded || typeof window.fetch !== 'function') return;
+
+    let base = null;
+    try {
+      const raw = String(apiTemplate);
+      // 第二种参数是 base：既能吃绝对地址，也能吃 "/meting/?..." 这样的相对路径
+      const parsed = new URL(raw.startsWith('//') ? window.location.protocol + raw : raw, window.location.href);
+      base = parsed.origin + parsed.pathname;
+    } catch (e) {
+      base = null;
+    }
+    if (!base) return;
+
+    const originalFetch = window.fetch;
+    const emptyList = () => new Response('[]', {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    window.__metingFetchGuarded = true;
+    window.fetch = function (input) {
+      const url = typeof input === 'string' ? input : (input && input.url) || '';
+      const promise = originalFetch.apply(this, arguments);
+      if (!String(url).startsWith(base)) return promise;
+
+      return promise.then(response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('json')) return response;
+        return emptyList();
+      }, emptyList);
+    };
+  }
+
   function renderMusicPlayer(container, musicConfig) {
     if (!musicConfig || !musicConfig.enabled) {
       container.innerHTML = '';
@@ -397,6 +436,8 @@ document.addEventListener('DOMContentLoaded', function() {
     Object.entries(attributes).forEach(([key, value]) => {
       if (value !== undefined) metingEl.setAttribute(key, value);
     });
+
+    guardMetingFetch(attributes.api);
 
     container.innerHTML = '';
     container.appendChild(metingEl);
