@@ -50,7 +50,7 @@
   "projectsName": "💻Projects",
   "projectsUrl": "https://github.com/nuoxi4n",
   "projectsList": [
-    { "title": "HomePages", "description": "这是我的个人主页项目，使用了HTML、CSS和JavaScript构建。", "url": "https://github.com/nuoxi4n/Homepage", "iconify": "flat-color-icons:home" },
+    { "title": "HomePages", "description": "这是我的个人主页项目，使用了HTML、CSS和JavaScript构建。", "url": "https://github.com/nuoxi4n/homepage", "iconify": "flat-color-icons:home" },
     { "title": "Beautiful-Report-Card", "description": "使用PHP+MYSQL开发的学生电子成绩查询系统，输入学号和身份证号即可查询信息。", "url": "https://github.com/NuoXianTech/Beautiful-Report-Card", "iconify": "flat-color-icons:statistics" },
     { "title": "API_Docs", "description": "这是我的API文档项目，包含了各种API的使用说明和示例。", "url": "https://github.com/nuoxi4n/API_Docs", "iconify": "flat-color-icons:document" },
     { "title": "Wishing-Tianqing", "description": "这是模仿天气之子剧中许愿天晴的网站，使用了PHP和MYSQL构建。", "url": "https://github.com/nuoxi4n/Wishing-Tianqing", "iconify": "flat-color-icons:landscape" },
