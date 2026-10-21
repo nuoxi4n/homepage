@@ -83,7 +83,7 @@ Homepage.onConfigLoaded(function (config) {
 ## 📁 目录结构
 
 ```
-Homepage/
+homepage/
 ├─ index.html              页面骨架 + 预加载脚本 + 骨架屏占位
 ├─ config.json             站点全部内容
 ├─ custom.js               自定义脚本（可删，不影响页面）
